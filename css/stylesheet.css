@@ -1,0 +1,27 @@
+body {
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    background-color: antiquewhite;
+    color:deepskyblue;
+    }
+
+.top {
+    font-family:'Courier New', Courier, monospace;
+    color: darkmagenta;
+    text-align:center;
+    }
+
+.video {
+    padding: 15px;
+}
+
+.middle {
+    font-weight: 600;
+    position: absolute;
+    right: 200px;
+}
+
+.bottom {
+    border: 5px;
+    border-style:solid;
+    margin: 10px;
+}

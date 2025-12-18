@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>US State Flag Quiz</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #score {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    #flag {
+      width: 300px;
+      height: auto;
+      border: 2px solid #333;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .correct {
+      background-color: #28a745 !important;
+    }
+
+    .wrong {
+      background-color: #dc3545 !important;
+    }
+
+    #next {
+      margin-top: 20px;
+      padding: 10px 20px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Guess the U.S. State Flag</h1>
+  <p id="score">Score: 0 / 0</p>
+
+  <img id="flag" src="" alt="State Flag">
+
+  <div class="options" id="options"></div>
+
+  <button id="next">Next Flag</button>
+
+  <script>
+    // DOM Elements
+    const flagImg = document.getElementById("flag");
+    const optionsDiv = document.getElementById("options");
+    const nextBtn = document.getElementById("next");
+    const scoreDisplay = document.getElementById("score");
+
+    // Game State
+    let score = 0;
+    let total = 0;
+    let answered = false;
+    let correctState;
+
+    // Data
+    const states = [
+    { name: "Alabama", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Alabama.svg/320px-Flag_of_Alabama.svg.png" },
+    { name: "Alaska", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_Alaska.svg/320px-Flag_of_Alaska.svg.png" },
+    { name: "Arizona", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Flag_of_Arizona.svg/320px-Flag_of_Arizona.svg.png" },
+    { name: "Arkansas", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Flag_of_Arkansas.svg/320px-Flag_of_Arkansas.svg.png" },
+    { name: "California", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Flag_of_California.svg/320px-Flag_of_California.svg.png" },
+    { name: "Colorado", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Flag_of_Colorado.svg/320px-Flag_of_Colorado.svg.png" },
+    { name: "Connecticut", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Flag_of_Connecticut.svg/320px-Flag_of_Connecticut.svg.png" },
+    { name: "Delaware", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Flag_of_Delaware.svg/320px-Flag_of_Delaware.svg.png" },
+    { name: "Florida", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Flag_of_Florida.svg/320px-Flag_of_Florida.svg.png" },
+    { name: "Georgia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Georgia_%28U.S._state%29.svg/320px-Flag_of_Georgia_%28U.S._state%29.svg.png" },
+    { name: "Hawaii", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Flag_of_Hawaii.svg/320px-Flag_of_Hawaii.svg.png" },
+    { name: "Idaho", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_Idaho.svg/320px-Flag_of_Idaho.svg.png" },
+    { name: "Illinois", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Flag_of_Illinois.svg/320px-Flag_of_Illinois.svg.png" },
+    { name: "Indiana", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Flag_of_Indiana.svg/320px-Flag_of_Indiana.svg.png" },
+    { name: "Iowa", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Flag_of_Iowa.svg/320px-Flag_of_Iowa.svg.png" },
+    { name: "Kansas", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Flag_of_Kansas.svg/320px-Flag_of_Kansas.svg.png" },
+    { name: "Kentucky", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Flag_of_Kentucky.svg/320px-Flag_of_Kentucky.svg.png" },
+    { name: "Louisiana", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Flag_of_Louisiana.svg/320px-Flag_of_Louisiana.svg.png" },
+    { name: "Maine", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Flag_of_Maine.svg/320px-Flag_of_Maine.svg.png" },
+    { name: "Maryland", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Flag_of_Maryland.svg/320px-Flag_of_Maryland.svg.png" },
+    { name: "Massachusetts", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Flag_of_Massachusetts.svg/320px-Flag_of_Massachusetts.svg.png" },
+    { name: "Michigan", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Flag_of_Michigan.svg/320px-Flag_of_Michigan.svg.png" },
+    { name: "Minnesota", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Flag_of_Minnesota.svg/320px-Flag_of_Minnesota.svg.png" },
+    { name: "Mississippi", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Flag_of_Mississippi.svg/320px-Flag_of_Mississippi.svg.png" },
+    { name: "Missouri", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Flag_of_Missouri.svg/320px-Flag_of_Missouri.svg.png" },
+    { name: "Montana", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_Montana.svg/320px-Flag_of_Montana.svg.png" },
+    { name: "Nebraska", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Flag_of_Nebraska.svg/320px-Flag_of_Nebraska.svg.png" },
+    { name: "Nevada", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Flag_of_Nevada.svg/320px-Flag_of_Nevada.svg.png" },
+    { name: "New Hampshire", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_New_Hampshire.svg/320px-Flag_of_New_Hampshire.svg.png" },
+    { name: "New Jersey", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Flag_of_New_Jersey.svg/320px-Flag_of_New_Jersey.svg.png" },
+    { name: "New Mexico", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Flag_of_New_Mexico.svg/320px-Flag_of_New_Mexico.svg.png" },
+    { name: "New York", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_New_York.svg/320px-Flag_of_New_York.svg.png" },
+    { name: "North Carolina", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Flag_of_North_Carolina.svg/320px-Flag_of_North_Carolina.svg.png" },
+    { name: "North Dakota", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Flag_of_North_Dakota.svg/320px-Flag_of_North_Dakota.svg.png" },
+    { name: "Ohio", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Ohio.svg/320px-Flag_of_Ohio.svg.png" },
+    { name: "Oklahoma", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Flag_of_Oklahoma.svg/320px-Flag_of_Oklahoma.svg.png" },
+    { name: "Oregon", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Flag_of_Oregon.svg/320px-Flag_of_Oregon.svg.png" },
+    { name: "Pennsylvania", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Flag_of_Pennsylvania.svg/320px-Flag_of_Pennsylvania.svg.png" },
+    { name: "Rhode Island", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Flag_of_Rhode_Island.svg/320px-Flag_of_Rhode_Island.svg.png" },
+    { name: "South Carolina", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Flag_of_South_Carolina.svg/320px-Flag_of_South_Carolina.svg.png" },
+    { name: "South Dakota", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_South_Dakota.svg/320px-Flag_of_South_Dakota.svg.png" },
+    { name: "Tennessee", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Flag_of_Tennessee.svg/320px-Flag_of_Tennessee.svg.png" },
+    { name: "Texas", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Flag_of_Texas.svg/320px-Flag_of_Texas.svg.png" },
+    { name: "Utah", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Flag_of_Utah.svg/320px-Flag_of_Utah.svg.png" },
+    { name: "Vermont", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Vermont.svg/320px-Flag_of_Vermont.svg.png" },
+    { name: "Virginia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Flag_of_Virginia.svg/320px-Flag_of_Virginia.svg.png" },
+    { name: "Washington", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Flag_of_Washington.svg/320px-Flag_of_Washington.svg.png" },
+    { name: "West Virginia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Flag_of_West_Virginia.svg/320px-Flag_of_West_Virginia.svg.png" },
+    { name: "Wisconsin", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Flag_of_Wisconsin.svg/320px-Flag_of_Wisconsin.svg.png" },
+    { name: "Wyoming", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Wyoming.svg/320px-Flag_of_Wyoming.svg.png" },
+    { name: "District of Columbia", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_the_District_of_Columbia.svg/320px-Flag_of_the_District_of_Columbia.svg.png" },
+    { name: "Puerto Rico", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Flag_of_Puerto_Rico.svg/320px-Flag_of_Puerto_Rico.svg.png" },
+    { name: "Guam", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Flag_of_Guam.svg/320px-Flag_of_Guam.svg.png" },
+    { name: "U.S. Virgin Islands", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Flag_of_the_United_States_Virgin_Islands.svg/320px-Flag_of_the_United_States_Virgin_Islands.svg.png" },
+    { name: "American Samoa", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Flag_of_American_Samoa.svg/320px-Flag_of_American_Samoa.svg.png" },
+    { name: "Northern Mariana Islands", flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Flag_of_the_Northern_Mariana_Islands.svg/320px-Flag_of_the_Northern_Mariana_Islands.svg.png" }
+    ];
+
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function newQuestion() {
+      answered = false;
+      nextBtn.style.display = "none";
+
+      const choices = shuffle(states).slice(0, 4);
+      correctState = choices[Math.floor(Math.random() * 4)];
+
+      flagImg.src = correctState.flag;
+      optionsDiv.innerHTML = "";
+
+      choices.forEach(state => {
+        const btn = document.createElement("button");
+        btn.textContent = state.name;
+        btn.onclick = () => checkAnswer(btn, state.name);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(button, answer) {
+      if (answered) return;
+      answered = true;
+      total++;
+
+      const buttons = document.querySelectorAll(".options button");
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === correctState.name) {
+          btn.classList.add("correct");
+        }
+      });
+
+      if (answer === correctState.name) {
+        score++;
+      } else {
+        button.classList.add("wrong");
+      }
+
+      scoreDisplay.textContent = `Score: ${score} / ${total}`;
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.addEventListener("click", newQuestion);
+
+    newQuestion();
+  </script>
+
+</body>
+</html>
